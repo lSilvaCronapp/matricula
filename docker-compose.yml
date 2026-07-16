@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16
+    container_name: gestao-matricula-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-matricula}
+      POSTGRES_USER: ${POSTGRES_USER:-matricula}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-matricula}
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-matricula} -d ${POSTGRES_DB:-matricula}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - matricula-net
+
+  # backend e frontend serão adicionados na Fase 3 (Dockerfiles + build)
+
+volumes:
+  pgdata:
+
+networks:
+  matricula-net:
+    driver: bridge
