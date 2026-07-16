@@ -21,3 +21,6 @@ frontend/coverage/
 
 # Logs
 *.log
+
+# Documentação local de planejamento/execução
+docs/
