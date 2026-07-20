@@ -1,0 +1,43 @@
+<div class="page-header">
+  <div>
+    <h1>{{ isEdit ? 'Editar curso' : 'Novo curso' }}</h1>
+    <p>Preencha os dados do curso.</p>
+  </div>
+  <a mat-button routerLink="/cursos">Voltar</a>
+</div>
+
+@if (loading) {
+  <div class="loading"><mat-spinner diameter="40" /></div>
+} @else {
+  <form class="form-grid" [formGroup]="form" (ngSubmit)="salvar()">
+    <mat-form-field appearance="outline">
+      <mat-label>Nome</mat-label>
+      <input matInput formControlName="nome" />
+      @if (fieldError('nome'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Código</mat-label>
+      <input matInput formControlName="codigo" />
+      @if (fieldError('codigo'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Descrição</mat-label>
+      <textarea matInput rows="3" formControlName="descricao"></textarea>
+    </mat-form-field>
+
+    <mat-checkbox formControlName="ativo">Ativo</mat-checkbox>
+
+    <div class="actions">
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Salvando...' : 'Salvar' }}
+      </button>
+      <a mat-button routerLink="/cursos">Cancelar</a>
+    </div>
+  </form>
+}

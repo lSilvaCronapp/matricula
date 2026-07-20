@@ -1,0 +1,25 @@
+<div class="page-header">
+  <div>
+    <h1>Matrículas</h1>
+    <p>Criação, confirmação, cancelamento e consultas.</p>
+  </div>
+</div>
+
+<nav mat-tab-nav-bar [tabPanel]="tabPanel">
+  @for (tab of tabs; track tab.route) {
+    <a
+      mat-tab-link
+      [routerLink]="tab.route"
+      routerLinkActive
+      #rla="routerLinkActive"
+      [active]="rla.isActive"
+    >
+      {{ tab.label }}
+    </a>
+  }
+</nav>
+<mat-tab-nav-panel #tabPanel>
+  <div class="tab-content">
+    <router-outlet />
+  </div>
+</mat-tab-nav-panel>

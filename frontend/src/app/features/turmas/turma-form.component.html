@@ -1,0 +1,79 @@
+<div class="page-header">
+  <div>
+    <h1>{{ isEdit ? 'Editar turma' : 'Nova turma' }}</h1>
+    <p>Preencha os dados da turma.</p>
+  </div>
+  <a mat-button routerLink="/turmas">Voltar</a>
+</div>
+
+@if (loading) {
+  <div class="loading"><mat-spinner diameter="40" /></div>
+} @else {
+  <form class="form-grid" [formGroup]="form" (ngSubmit)="salvar()">
+    <mat-form-field appearance="outline">
+      <mat-label>Código</mat-label>
+      <input matInput formControlName="codigo" />
+      @if (fieldError('codigo'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Disciplina</mat-label>
+      <mat-select formControlName="disciplinaId">
+        @for (disciplina of disciplinas; track disciplina.id) {
+          <mat-option [value]="disciplina.id">
+            {{ disciplina.codigo }} — {{ disciplina.nome }}
+          </mat-option>
+        }
+      </mat-select>
+      @if (fieldError('disciplinaId'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Ano</mat-label>
+      <input matInput type="number" formControlName="ano" min="2000" />
+      @if (fieldError('ano'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Período</mat-label>
+      <mat-select formControlName="periodo">
+        @for (periodo of periodoOptions; track periodo) {
+          <mat-option [value]="periodo">{{ periodo }}º semestre</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Limite de vagas</mat-label>
+      <input matInput type="number" formControlName="limiteVagas" min="1" />
+      @if (vagasOcupadas !== null) {
+        <mat-hint>Vagas ocupadas: {{ vagasOcupadas }} (somente leitura)</mat-hint>
+      }
+      @if (fieldError('limiteVagas'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select formControlName="status">
+        @for (status of statusOptions; track status) {
+          <mat-option [value]="status">{{ status }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="actions">
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Salvando...' : 'Salvar' }}
+      </button>
+      <a mat-button routerLink="/turmas">Cancelar</a>
+    </div>
+  </form>
+}
