@@ -2,8 +2,6 @@
 
 Solução para cadastro de alunos, cursos, disciplinas e turmas, com controle de matrículas e regras de negócio (criar, confirmar e cancelar).
 
-> Planejamento completo: [`docs/DECISOES-TECNICAS.md`](docs/DECISOES-TECNICAS.md)
-
 ## Visão geral
 
 Monorepo com API REST (Spring Boot), interface Angular e PostgreSQL. O fluxo principal é a matrícula de um aluno em uma turma: a solicitação nasce **PENDENTE** (sem consumir vaga), pode ser **CONFIRMADA** (consome vaga) ou **CANCELADA**.
