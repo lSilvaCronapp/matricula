@@ -1,0 +1,58 @@
+<div class="page-header">
+  <div>
+    <h1>{{ isEdit ? 'Editar disciplina' : 'Nova disciplina' }}</h1>
+    <p>Preencha os dados da disciplina.</p>
+  </div>
+  <a mat-button routerLink="/disciplinas">Voltar</a>
+</div>
+
+@if (loading) {
+  <div class="loading"><mat-spinner diameter="40" /></div>
+} @else {
+  <form class="form-grid" [formGroup]="form" (ngSubmit)="salvar()">
+    <mat-form-field appearance="outline">
+      <mat-label>Nome</mat-label>
+      <input matInput formControlName="nome" />
+      @if (fieldError('nome'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Código</mat-label>
+      <input matInput formControlName="codigo" />
+      @if (fieldError('codigo'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Carga horária</mat-label>
+      <input matInput type="number" formControlName="cargaHoraria" min="1" />
+      @if (fieldError('cargaHoraria'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Curso</mat-label>
+      <mat-select formControlName="cursoId">
+        @for (curso of cursos; track curso.id) {
+          <mat-option [value]="curso.id">{{ curso.codigo }} — {{ curso.nome }}</mat-option>
+        }
+      </mat-select>
+      @if (fieldError('cursoId'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-checkbox formControlName="ativo">Ativo</mat-checkbox>
+
+    <div class="actions">
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Salvando...' : 'Salvar' }}
+      </button>
+      <a mat-button routerLink="/disciplinas">Cancelar</a>
+    </div>
+  </form>
+}

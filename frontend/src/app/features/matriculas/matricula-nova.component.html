@@ -1,0 +1,70 @@
+<form class="form-grid" [formGroup]="form" (ngSubmit)="criar()">
+  <mat-form-field appearance="outline">
+    <mat-label>Aluno</mat-label>
+    <mat-select formControlName="alunoId">
+      @for (aluno of alunos; track aluno.id) {
+        <mat-option [value]="aluno.id">
+          {{ aluno.matriculaAcademica }} — {{ aluno.nome }}
+        </mat-option>
+      }
+    </mat-select>
+    @if (fieldError('alunoId'); as msg) {
+      <mat-error>{{ msg }}</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Turma (somente ABERTA)</mat-label>
+    <mat-select formControlName="turmaId">
+      @for (turma of turmasAbertas; track turma.id) {
+        <mat-option [value]="turma.id">
+          {{ turma.codigo }} — {{ turma.disciplinaNome }}
+          ({{ turma.vagasOcupadas }}/{{ turma.limiteVagas }})
+        </mat-option>
+      }
+    </mat-select>
+    @if (fieldError('turmaId'); as msg) {
+      <mat-error>{{ msg }}</mat-error>
+    }
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-flat-button color="primary" type="submit" [disabled]="saving">
+      {{ saving ? 'Criando...' : 'Criar matrícula' }}
+    </button>
+  </div>
+</form>
+
+@if (ultimaMatricula) {
+  <mat-card class="result-card">
+    <mat-card-header>
+      <mat-card-title>Matrícula criada</mat-card-title>
+      <mat-card-subtitle>
+        {{ ultimaMatricula.alunoNome }} · {{ ultimaMatricula.turmaCodigo }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p>
+        Status:
+        <mat-chip>{{ ultimaMatricula.status }}</mat-chip>
+      </p>
+      <p>Solicitação: {{ ultimaMatricula.dataSolicitacao | brasiliaDate }}</p>
+      @if (ultimaMatricula.dataConfirmacao) {
+        <p>Confirmação: {{ ultimaMatricula.dataConfirmacao | brasiliaDate }}</p>
+      }
+    </mat-card-content>
+    @if (ultimaMatricula.status === 'PENDENTE') {
+      <mat-card-actions>
+        <button
+          mat-flat-button
+          color="accent"
+          type="button"
+          [disabled]="confirming"
+          (click)="confirmarAgora()"
+        >
+          {{ confirming ? 'Confirmando...' : 'Confirmar agora' }}
+        </button>
+      </mat-card-actions>
+    }
+  </mat-card>
+}

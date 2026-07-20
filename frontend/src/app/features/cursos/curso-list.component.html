@@ -1,0 +1,49 @@
+<div class="page-header">
+  <div>
+    <h1>Cursos</h1>
+    <p>Cadastro e manutenção de cursos.</p>
+  </div>
+  <a mat-flat-button color="primary" routerLink="/cursos/novo">
+    <mat-icon>add</mat-icon>
+    Novo curso
+  </a>
+</div>
+
+@if (loading) {
+  <div class="loading"><mat-spinner diameter="40" /></div>
+} @else if (cursos.length === 0) {
+  <p class="empty">Nenhum curso cadastrado.</p>
+} @else {
+  <table mat-table [dataSource]="cursos" class="full-width">
+    <ng-container matColumnDef="codigo">
+      <th mat-header-cell *matHeaderCellDef>Código</th>
+      <td mat-cell *matCellDef="let row">{{ row.codigo }}</td>
+    </ng-container>
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef>Nome</th>
+      <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
+    </ng-container>
+    <ng-container matColumnDef="ativo">
+      <th mat-header-cell *matHeaderCellDef>Ativo</th>
+      <td mat-cell *matCellDef="let row">{{ row.ativo ? 'Sim' : 'Não' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="updatedAt">
+      <th mat-header-cell *matHeaderCellDef>Atualizado</th>
+      <td mat-cell *matCellDef="let row">{{ row.updatedAt | brasiliaDate }}</td>
+    </ng-container>
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef>Ações</th>
+      <td mat-cell *matCellDef="let row">
+        <a mat-icon-button [routerLink]="['/cursos', row.id, 'editar']" aria-label="Editar">
+          <mat-icon>edit</mat-icon>
+        </a>
+        <button mat-icon-button color="warn" type="button" (click)="excluir(row)" aria-label="Excluir">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+}

@@ -1,0 +1,59 @@
+<div class="page-header">
+  <div>
+    <h1>{{ isEdit ? 'Editar aluno' : 'Novo aluno' }}</h1>
+    <p>Preencha os dados do aluno.</p>
+  </div>
+  <a mat-button routerLink="/alunos">Voltar</a>
+</div>
+
+@if (loading) {
+  <div class="loading"><mat-spinner diameter="40" /></div>
+} @else {
+  <form class="form-grid" [formGroup]="form" (ngSubmit)="salvar()">
+    <mat-form-field appearance="outline">
+      <mat-label>Nome</mat-label>
+      <input matInput formControlName="nome" />
+      @if (fieldError('nome'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>E-mail</mat-label>
+      <input matInput type="email" formControlName="email" />
+      @if (fieldError('email'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>CPF</mat-label>
+      <input matInput formControlName="cpf" appCpfMask maxlength="14" />
+      @if (fieldError('cpf'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Matrícula acadêmica (RA)</mat-label>
+      <input matInput formControlName="matriculaAcademica" />
+      @if (fieldError('matriculaAcademica'); as msg) {
+        <mat-error>{{ msg }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Data de nascimento</mat-label>
+      <input matInput type="date" formControlName="dataNascimento" />
+    </mat-form-field>
+
+    <mat-checkbox formControlName="ativo">Ativo</mat-checkbox>
+
+    <div class="actions">
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Salvando...' : 'Salvar' }}
+      </button>
+      <a mat-button routerLink="/alunos">Cancelar</a>
+    </div>
+  </form>
+}

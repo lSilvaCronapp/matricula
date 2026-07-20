@@ -1,0 +1,25 @@
+.filter-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  max-width: 840px;
+}
+
+.grow {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.empty {
+  color: rgba(0, 0, 0, 0.6);
+  padding: 1rem 0;
+}
+
+.readonly {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 0.875rem;
+}

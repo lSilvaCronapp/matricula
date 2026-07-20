@@ -1,0 +1,45 @@
+.shell {
+  height: 100vh;
+}
+
+.shell__nav {
+  width: 260px;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.shell__brand {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+  mat-icon {
+    color: #1565c0;
+  }
+
+  strong,
+  span {
+    display: block;
+    line-height: 1.25;
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.shell__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.shell__content {
+  padding: 1.5rem;
+}
+
+.active-link {
+  background: rgba(21, 101, 192, 0.08);
+}

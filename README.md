@@ -9,8 +9,8 @@ Solução para cadastro de alunos, cursos, disciplinas e turmas, com controle de
 | Fase | Descrição | Status |
 |------|-----------|--------|
 | 0 | Esqueleto do repositório + Postgres | Concluída — [`docs/FASE-0-EXECUCAO.md`](docs/FASE-0-EXECUCAO.md) |
-| 1 | Backend (API REST) | Pendente |
-| 2 | Frontend (Angular) | Pendente |
+| 1 | Backend (API REST) | Concluída — [`docs/FASE-1-EXECUCAO.md`](docs/FASE-1-EXECUCAO.md) |
+| 2 | Frontend (Angular) | Concluída — [`docs/FASE-2-EXECUCAO.md`](docs/FASE-2-EXECUCAO.md) |
 | 3 | Docker completo + README final | Pendente |
 
 ## Stack (planejada)
