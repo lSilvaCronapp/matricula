@@ -21,7 +21,39 @@ services:
     networks:
       - matricula-net
 
-  # backend e frontend serão adicionados na Fase 3 (Dockerfiles + build)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gestao-matricula-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-matricula}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-matricula}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-matricula}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      TZ: UTC
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    networks:
+      - matricula-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gestao-matricula-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    networks:
+      - matricula-net
 
 volumes:
   pgdata:
