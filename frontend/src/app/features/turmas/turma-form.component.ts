@@ -61,9 +61,9 @@ export class TurmaFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
-    this.disciplinaService.listar().subscribe({
-      next: (disciplinas) => {
-        this.disciplinas = disciplinas;
+    this.disciplinaService.listar({ page: 0, size: 100 }).subscribe({
+      next: (page) => {
+        this.disciplinas = page.content;
       }
     });
 

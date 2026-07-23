@@ -24,10 +24,10 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class ShellLayoutComponent {
   readonly menuItems = [
+    { label: 'Matrículas', route: '/matriculas', icon: 'assignment' },
     { label: 'Alunos', route: '/alunos', icon: 'school' },
     { label: 'Cursos', route: '/cursos', icon: 'menu_book' },
     { label: 'Disciplinas', route: '/disciplinas', icon: 'library_books' },
-    { label: 'Turmas', route: '/turmas', icon: 'groups' },
-    { label: 'Matrículas', route: '/matriculas', icon: 'assignment' }
+    { label: 'Turmas', route: '/turmas', icon: 'groups' }
   ];
 }

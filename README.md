@@ -130,7 +130,22 @@ Base: `/api/v1`
 CRUD: `alunos`, `cursos`, `disciplinas`, `turmas`  
 (`POST`, `GET`, `GET/{id}`, `PUT/{id}`, `DELETE/{id}`)
 
-Filtro útil: `GET /turmas?status=ABERTA`
+**Listagens (`GET` de coleção)** devolvem envelope paginado:
+
+```json
+{
+  "content": [ /* itens */ ],
+  "page": 0,
+  "size": 10,
+  "totalElements": 42,
+  "totalPages": 5
+}
+```
+
+Query params: `page` (default 0), `size` (default 10, máx. 100), `sort`, `q` (busca textual).  
+Turmas: também `status=ABERTA|FECHADA`.
+
+Exemplo: `GET /api/v1/alunos?page=0&size=10&q=maria`
 
 | Método | Path | Efeito |
 |--------|------|--------|
@@ -138,8 +153,8 @@ Filtro útil: `GET /turmas?status=ABERTA`
 | `GET` | `/matriculas/{id}` | detalhe |
 | `PATCH` | `/matriculas/{id}/confirmar` | confirma e consome vaga |
 | `PATCH` | `/matriculas/{id}/cancelar` | cancela e libera vaga se preciso |
-| `GET` | `/matriculas/aluno/{alunoId}` | por aluno |
-| `GET` | `/matriculas/turma/{turmaId}` | por turma |
+| `GET` | `/matriculas/aluno/{alunoId}` | por aluno (`PageResponse` + `q`) |
+| `GET` | `/matriculas/turma/{turmaId}` | por turma (`PageResponse` + `q`) |
 
 ## Tratamento de erros
 
@@ -177,6 +192,8 @@ Formato:
 - Flyway / Liquibase
 - Mensageria
 - Documentação além do README + Swagger
+- Autocomplete nos selects de curso/disciplina (forms CRUD)
+- Filtros avançados multi-campo além de `q`
 
 ## Estrutura do monorepo
 

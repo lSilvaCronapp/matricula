@@ -3,15 +3,18 @@ package br.edu.com.matricula.service;
 import br.edu.com.matricula.domain.enums.StatusMatricula;
 import br.edu.com.matricula.dto.request.MatriculaCreateRequest;
 import br.edu.com.matricula.dto.response.MatriculaResponse;
+import br.edu.com.matricula.dto.response.PageResponse;
 import br.edu.com.matricula.exception.BusinessRuleException;
 import br.edu.com.matricula.exception.ResourceNotFoundException;
 import br.edu.com.matricula.mapper.MatriculaMapper;
 import br.edu.com.matricula.repository.MatriculaRepository;
+import br.edu.com.matricula.repository.spec.EntitySpecs;
+import br.edu.com.matricula.util.SearchUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -98,19 +101,21 @@ public class MatriculaService {
     }
 
     @Transactional(readOnly = true)
-    public List<MatriculaResponse> buscarPorAluno(UUID alunoId) {
+    public PageResponse<MatriculaResponse> buscarPorAluno(UUID alunoId, String q, Pageable pageable) {
         alunoService.buscarEntidade(alunoId);
-        return matriculaRepository.findByAlunoId(alunoId).stream()
-                .map(MatriculaMapper::toResponse)
-                .toList();
+        var page = matriculaRepository
+                .findAll(EntitySpecs.matriculaPorAluno(alunoId, SearchUtils.normalize(q)), pageable)
+                .map(MatriculaMapper::toResponse);
+        return PageResponse.from(page);
     }
 
     @Transactional(readOnly = true)
-    public List<MatriculaResponse> buscarPorTurma(UUID turmaId) {
+    public PageResponse<MatriculaResponse> buscarPorTurma(UUID turmaId, String q, Pageable pageable) {
         turmaService.buscarEntidade(turmaId);
-        return matriculaRepository.findByTurmaId(turmaId).stream()
-                .map(MatriculaMapper::toResponse)
-                .toList();
+        var page = matriculaRepository
+                .findAll(EntitySpecs.matriculaPorTurma(turmaId, SearchUtils.normalize(q)), pageable)
+                .map(MatriculaMapper::toResponse);
+        return PageResponse.from(page);
     }
 
     private br.edu.com.matricula.domain.model.Matricula buscarEntidade(UUID id) {

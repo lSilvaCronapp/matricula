@@ -2,9 +2,13 @@ package br.edu.com.matricula.controller;
 
 import br.edu.com.matricula.domain.enums.StatusTurma;
 import br.edu.com.matricula.dto.request.TurmaRequest;
+import br.edu.com.matricula.dto.response.PageResponse;
 import br.edu.com.matricula.dto.response.TurmaResponse;
 import br.edu.com.matricula.service.TurmaService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -41,8 +44,12 @@ public class TurmaController {
     }
 
     @GetMapping
-    public List<TurmaResponse> listar(@RequestParam(required = false) StatusTurma status) {
-        return turmaService.listar(status);
+    public PageResponse<TurmaResponse> listar(
+            @RequestParam(required = false) StatusTurma status,
+            @RequestParam(required = false) String q,
+            @PageableDefault(size = 10, sort = "codigo", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        return turmaService.listar(status, q, pageable);
     }
 
     @GetMapping("/{id}")

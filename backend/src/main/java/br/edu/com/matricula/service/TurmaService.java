@@ -3,6 +3,7 @@ package br.edu.com.matricula.service;
 import br.edu.com.matricula.domain.enums.StatusTurma;
 import br.edu.com.matricula.domain.model.Turma;
 import br.edu.com.matricula.dto.request.TurmaRequest;
+import br.edu.com.matricula.dto.response.PageResponse;
 import br.edu.com.matricula.dto.response.TurmaResponse;
 import br.edu.com.matricula.exception.BusinessRuleException;
 import br.edu.com.matricula.exception.ResourceNotFoundException;
@@ -10,10 +11,12 @@ import br.edu.com.matricula.mapper.TurmaMapper;
 import br.edu.com.matricula.repository.DisciplinaRepository;
 import br.edu.com.matricula.repository.MatriculaRepository;
 import br.edu.com.matricula.repository.TurmaRepository;
+import br.edu.com.matricula.repository.spec.EntitySpecs;
+import br.edu.com.matricula.util.SearchUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -42,9 +45,11 @@ public class TurmaService {
     }
 
     @Transactional(readOnly = true)
-    public List<TurmaResponse> listar(StatusTurma status) {
-        var turmas = status == null ? turmaRepository.findAll() : turmaRepository.findByStatus(status);
-        return turmas.stream().map(TurmaMapper::toResponse).toList();
+    public PageResponse<TurmaResponse> listar(StatusTurma status, String q, Pageable pageable) {
+        var page = turmaRepository
+                .findAll(EntitySpecs.turmaComFiltros(status, SearchUtils.normalize(q)), pageable)
+                .map(TurmaMapper::toResponse);
+        return PageResponse.from(page);
     }
 
     @Transactional(readOnly = true)

@@ -9,10 +9,16 @@
   </a>
 </div>
 
-@if (loading) {
+<mat-form-field appearance="outline" class="search-field">
+  <mat-label>Buscar</mat-label>
+  <input matInput [formControl]="searchControl" placeholder="Nome, e-mail, CPF ou RA" />
+  <mat-icon matSuffix>search</mat-icon>
+</mat-form-field>
+
+@if (loading && alunos.length === 0) {
   <div class="loading"><mat-spinner diameter="40" /></div>
-} @else if (alunos.length === 0) {
-  <p class="empty">Nenhum aluno cadastrado.</p>
+} @else if (!loading && alunos.length === 0) {
+  <p class="empty">Nenhum aluno encontrado.</p>
 } @else {
   <table mat-table [dataSource]="alunos" class="full-width">
     <ng-container matColumnDef="nome">
@@ -54,4 +60,12 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
+
+  <mat-paginator
+    [length]="totalElements"
+    [pageIndex]="pageIndex"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[5, 10, 20, 50]"
+    (page)="onPage($event)"
+  />
 }

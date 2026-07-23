@@ -3,15 +3,18 @@ package br.edu.com.matricula.service;
 import br.edu.com.matricula.domain.model.Aluno;
 import br.edu.com.matricula.dto.request.AlunoRequest;
 import br.edu.com.matricula.dto.response.AlunoResponse;
+import br.edu.com.matricula.dto.response.PageResponse;
 import br.edu.com.matricula.exception.BusinessRuleException;
 import br.edu.com.matricula.exception.ResourceNotFoundException;
 import br.edu.com.matricula.mapper.AlunoMapper;
 import br.edu.com.matricula.repository.AlunoRepository;
 import br.edu.com.matricula.repository.MatriculaRepository;
+import br.edu.com.matricula.repository.spec.EntitySpecs;
+import br.edu.com.matricula.util.SearchUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -32,8 +35,11 @@ public class AlunoService {
     }
 
     @Transactional(readOnly = true)
-    public List<AlunoResponse> listar() {
-        return alunoRepository.findAll().stream().map(AlunoMapper::toResponse).toList();
+    public PageResponse<AlunoResponse> listar(String q, Pageable pageable) {
+        var page = alunoRepository
+                .findAll(EntitySpecs.alunoComBusca(SearchUtils.normalize(q)), pageable)
+                .map(AlunoMapper::toResponse);
+        return PageResponse.from(page);
     }
 
     @Transactional(readOnly = true)

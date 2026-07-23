@@ -18,7 +18,17 @@ export const routes: Routes = [
     path: '',
     component: ShellLayoutComponent,
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'alunos' },
+      { path: '', pathMatch: 'full', redirectTo: 'matriculas' },
+      {
+        path: 'matriculas',
+        component: MatriculasShellComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'nova' },
+          { path: 'nova', component: MatriculaNovaComponent },
+          { path: 'por-aluno', component: MatriculaPorAlunoComponent },
+          { path: 'por-turma', component: MatriculaPorTurmaComponent }
+        ]
+      },
       { path: 'alunos', component: AlunoListComponent },
       { path: 'alunos/novo', component: AlunoFormComponent },
       { path: 'alunos/:id/editar', component: AlunoFormComponent },
@@ -30,18 +40,8 @@ export const routes: Routes = [
       { path: 'disciplinas/:id/editar', component: DisciplinaFormComponent },
       { path: 'turmas', component: TurmaListComponent },
       { path: 'turmas/novo', component: TurmaFormComponent },
-      { path: 'turmas/:id/editar', component: TurmaFormComponent },
-      {
-        path: 'matriculas',
-        component: MatriculasShellComponent,
-        children: [
-          { path: '', pathMatch: 'full', redirectTo: 'nova' },
-          { path: 'nova', component: MatriculaNovaComponent },
-          { path: 'por-aluno', component: MatriculaPorAlunoComponent },
-          { path: 'por-turma', component: MatriculaPorTurmaComponent }
-        ]
-      }
+      { path: 'turmas/:id/editar', component: TurmaFormComponent }
     ]
   },
-  { path: '**', redirectTo: 'alunos' }
+  { path: '**', redirectTo: 'matriculas' }
 ];

@@ -9,6 +9,13 @@
   p { margin: 0.25rem 0 0; color: rgba(0, 0, 0, 0.6); }
 }
 
+.search-field {
+  width: 100%;
+  max-width: 420px;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
 .full-width { width: 100%; }
 
 .loading,

@@ -1,18 +1,21 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { filter, switchMap } from 'rxjs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { Observable, debounceTime, distinctUntilChanged, filter, map, switchMap } from 'rxjs';
 import { Aluno } from '../../core/models/aluno';
 import { Matricula } from '../../core/models/matricula';
 import { AlunoService } from '../../core/services/aluno.service';
 import { MatriculaService } from '../../core/services/matricula.service';
+import { autocompleteSearch } from '../../core/utils/autocomplete-search.util';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
 import { BrasiliaDatePipe } from '../../shared/pipes/brasilia-date.pipe';
 
@@ -21,14 +24,16 @@ import { BrasiliaDatePipe } from '../../shared/pipes/brasilia-date.pipe';
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    AsyncPipe,
     MatButtonModule,
     MatFormFieldModule,
-    MatSelectModule,
+    MatInputModule,
+    MatAutocompleteModule,
     MatTableModule,
-    MatIconModule,
     MatSnackBarModule,
     MatChipsModule,
     MatDialogModule,
+    MatPaginatorModule,
     BrasiliaDatePipe
   ],
   templateUrl: './matricula-por-aluno.component.html',
@@ -44,11 +49,16 @@ export class MatriculaPorAlunoComponent implements OnInit {
   readonly form = this.fb.nonNullable.group({
     alunoId: ['', Validators.required]
   });
+  readonly alunoSearch = new FormControl<string | Aluno>('', { nonNullable: true });
+  readonly resultSearch = new FormControl('', { nonNullable: true });
 
-  alunos: Aluno[] = [];
+  alunosFiltrados$!: Observable<Aluno[]>;
   matriculas: Matricula[] = [];
   loading = false;
   consulted = false;
+  totalElements = 0;
+  pageIndex = 0;
+  pageSize = 10;
   displayedColumns = [
     'turmaCodigo',
     'disciplinaNome',
@@ -59,37 +69,80 @@ export class MatriculaPorAlunoComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.alunoService.listar().subscribe({
-      next: (alunos) => {
-        this.alunos = alunos;
+    this.alunosFiltrados$ = autocompleteSearch(
+      this.alunoSearch.valueChanges,
+      this.alunoSearch.value,
+      (term) => (typeof term === 'string' ? term.trim() : ''),
+      (q) =>
+        this.alunoService
+          .listar({ page: 0, size: 10, q })
+          .pipe(map((page) => page.content ?? [])),
+      () => this.form.controls.alunoId.setValue('')
+    );
+
+    this.resultSearch.valueChanges.pipe(debounceTime(300), distinctUntilChanged()).subscribe(() => {
+      if (this.consulted) {
+        this.pageIndex = 0;
+        this.consultar(false);
       }
     });
   }
 
-  consultar(): void {
+  displayAluno = (value: string | Aluno): string => {
+    if (!value) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    return `${value.matriculaAcademica} — ${value.nome}`;
+  };
+
+  selecionarAluno(aluno: Aluno): void {
+    this.form.controls.alunoId.setValue(aluno.id);
+  }
+
+  consultar(resetPage = true): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
+    if (resetPage) {
+      this.pageIndex = 0;
+    }
 
     this.loading = true;
     this.consulted = true;
-    this.matriculaService.listarPorAluno(this.form.controls.alunoId.value).subscribe({
-      next: (matriculas) => {
-        this.matriculas = matriculas;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      }
-    });
+    this.matriculaService
+      .listarPorAluno(this.form.controls.alunoId.value, {
+        page: this.pageIndex,
+        size: this.pageSize,
+        q: this.resultSearch.value.trim() || undefined
+      })
+      .subscribe({
+        next: (page) => {
+          this.matriculas = page.content ?? [];
+          this.totalElements = page.totalElements ?? 0;
+          this.loading = false;
+        },
+        error: () => {
+          this.matriculas = [];
+          this.loading = false;
+        }
+      });
+  }
+
+  onPage(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.consultar(false);
   }
 
   confirmar(matricula: Matricula): void {
     this.matriculaService.confirmar(matricula.id).subscribe({
       next: () => {
         this.snackBar.open('Matrícula confirmada.', 'Fechar', { duration: 3000 });
-        this.consultar();
+        this.consultar(false);
       }
     });
   }
@@ -111,7 +164,7 @@ export class MatriculaPorAlunoComponent implements OnInit {
       .subscribe({
         next: () => {
           this.snackBar.open('Matrícula cancelada.', 'Fechar', { duration: 3000 });
-          this.consultar();
+          this.consultar(false);
         }
       });
   }

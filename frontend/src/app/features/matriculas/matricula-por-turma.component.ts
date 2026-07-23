@@ -1,17 +1,21 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule } from '@angular/material/table';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { filter, switchMap } from 'rxjs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { Observable, debounceTime, distinctUntilChanged, filter, map, switchMap } from 'rxjs';
 import { Matricula } from '../../core/models/matricula';
 import { Turma } from '../../core/models/turma';
 import { MatriculaService } from '../../core/services/matricula.service';
 import { TurmaService } from '../../core/services/turma.service';
+import { autocompleteSearch } from '../../core/utils/autocomplete-search.util';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
 import { BrasiliaDatePipe } from '../../shared/pipes/brasilia-date.pipe';
 
@@ -20,13 +24,16 @@ import { BrasiliaDatePipe } from '../../shared/pipes/brasilia-date.pipe';
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    AsyncPipe,
     MatButtonModule,
     MatFormFieldModule,
-    MatSelectModule,
+    MatInputModule,
+    MatAutocompleteModule,
     MatTableModule,
     MatSnackBarModule,
     MatChipsModule,
     MatDialogModule,
+    MatPaginatorModule,
     BrasiliaDatePipe
   ],
   templateUrl: './matricula-por-turma.component.html',
@@ -42,11 +49,16 @@ export class MatriculaPorTurmaComponent implements OnInit {
   readonly form = this.fb.nonNullable.group({
     turmaId: ['', Validators.required]
   });
+  readonly turmaSearch = new FormControl<string | Turma>('', { nonNullable: true });
+  readonly resultSearch = new FormControl('', { nonNullable: true });
 
-  turmas: Turma[] = [];
+  turmasFiltradas$!: Observable<Turma[]>;
   matriculas: Matricula[] = [];
   loading = false;
   consulted = false;
+  totalElements = 0;
+  pageIndex = 0;
+  pageSize = 10;
   displayedColumns = [
     'alunoNome',
     'status',
@@ -57,37 +69,80 @@ export class MatriculaPorTurmaComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.turmaService.listar().subscribe({
-      next: (turmas) => {
-        this.turmas = turmas;
+    this.turmasFiltradas$ = autocompleteSearch(
+      this.turmaSearch.valueChanges,
+      this.turmaSearch.value,
+      (term) => (typeof term === 'string' ? term.trim() : ''),
+      (q) =>
+        this.turmaService
+          .listar({ page: 0, size: 10, q })
+          .pipe(map((page) => page.content ?? [])),
+      () => this.form.controls.turmaId.setValue('')
+    );
+
+    this.resultSearch.valueChanges.pipe(debounceTime(300), distinctUntilChanged()).subscribe(() => {
+      if (this.consulted) {
+        this.pageIndex = 0;
+        this.consultar(false);
       }
     });
   }
 
-  consultar(): void {
+  displayTurma = (value: string | Turma): string => {
+    if (!value) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    return `${value.codigo} — ${value.disciplinaNome}`;
+  };
+
+  selecionarTurma(turma: Turma): void {
+    this.form.controls.turmaId.setValue(turma.id);
+  }
+
+  consultar(resetPage = true): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
+    if (resetPage) {
+      this.pageIndex = 0;
+    }
 
     this.loading = true;
     this.consulted = true;
-    this.matriculaService.listarPorTurma(this.form.controls.turmaId.value).subscribe({
-      next: (matriculas) => {
-        this.matriculas = matriculas;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      }
-    });
+    this.matriculaService
+      .listarPorTurma(this.form.controls.turmaId.value, {
+        page: this.pageIndex,
+        size: this.pageSize,
+        q: this.resultSearch.value.trim() || undefined
+      })
+      .subscribe({
+        next: (page) => {
+          this.matriculas = page.content ?? [];
+          this.totalElements = page.totalElements ?? 0;
+          this.loading = false;
+        },
+        error: () => {
+          this.matriculas = [];
+          this.loading = false;
+        }
+      });
+  }
+
+  onPage(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.consultar(false);
   }
 
   confirmar(matricula: Matricula): void {
     this.matriculaService.confirmar(matricula.id).subscribe({
       next: () => {
         this.snackBar.open('Matrícula confirmada.', 'Fechar', { duration: 3000 });
-        this.consultar();
+        this.consultar(false);
       }
     });
   }
@@ -109,7 +164,7 @@ export class MatriculaPorTurmaComponent implements OnInit {
       .subscribe({
         next: () => {
           this.snackBar.open('Matrícula cancelada.', 'Fechar', { duration: 3000 });
-          this.consultar();
+          this.consultar(false);
         }
       });
   }
