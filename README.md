@@ -218,8 +218,3 @@ gestao-matricula/
 7. Fechar turma → nova matrícula/confirmação bloqueadas
 8. Consultar por aluno e por turma
 9. Excluir curso com disciplina → **409**
-
-## Documentação adicional
-
-- [`docs/DECISOES-TECNICAS.md`](docs/DECISOES-TECNICAS.md)
-- Relatórios: `docs/FASE-0-EXECUCAO.md` … `docs/FASE-3-EXECUCAO.md`
