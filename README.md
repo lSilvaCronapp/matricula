@@ -182,13 +182,39 @@ Formato:
 
 - Sem autenticação / autorização
 - Sem migrations versionadas (`ddl-auto: update`)
-- Sem testes automatizados de domínio
 - Sem mensageria
 - Matrícula `CANCELADA` não volta a `PENDENTE`/`CONFIRMADA`
 
+## Testes
+
+Cobertura das regras de matrícula (unitários + API). Pré-requisito: Postgres do Compose e database `matricula_test`:
+
+```bash
+docker compose up -d db
+docker exec gestao-matricula-db psql -U matricula -d matricula -c "CREATE DATABASE matricula_test;"
+```
+
+Com Maven/JDK 21 locais:
+
+```bash
+cd backend && mvn test
+```
+
+Sem Maven local (via container; `--network host` para alcançar o Postgres em `localhost:5432`):
+
+```bash
+cd backend
+docker run --rm -v "$PWD":/workspace -w /workspace --network host \
+  maven:3.9.10-eclipse-temurin-21 \
+  mvn -B test
+```
+
+> Se `matricula_test` já existir, o `CREATE DATABASE` pode ser ignorado.
+
+Detalhes em [`docs/DECISOES-TECNICAS.md`](docs/DECISOES-TECNICAS.md) §13.
+
 ## Backlog
 
-- Testes do `MatriculaService` (primeiro item se sobrar tempo)
 - Flyway / Liquibase
 - Mensageria
 - Documentação além do README + Swagger
