@@ -1,17 +1,21 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { AsyncPipe } from '@angular/common';
+import { Observable, map } from 'rxjs';
 import { Aluno } from '../../core/models/aluno';
 import { Matricula } from '../../core/models/matricula';
 import { Turma } from '../../core/models/turma';
 import { AlunoService } from '../../core/services/aluno.service';
 import { MatriculaService } from '../../core/services/matricula.service';
 import { TurmaService } from '../../core/services/turma.service';
+import { autocompleteSearch } from '../../core/utils/autocomplete-search.util';
 import { BrasiliaDatePipe } from '../../shared/pipes/brasilia-date.pipe';
 import { applyServerFieldErrors } from '../../shared/utils/form-error.util';
 
@@ -20,9 +24,11 @@ import { applyServerFieldErrors } from '../../shared/utils/form-error.util';
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    AsyncPipe,
     MatButtonModule,
     MatFormFieldModule,
-    MatSelectModule,
+    MatInputModule,
+    MatAutocompleteModule,
     MatSnackBarModule,
     MatCardModule,
     MatChipsModule,
@@ -43,23 +49,66 @@ export class MatriculaNovaComponent implements OnInit {
     turmaId: ['', Validators.required]
   });
 
-  alunos: Aluno[] = [];
-  turmasAbertas: Turma[] = [];
+  readonly alunoSearch = new FormControl<string | Aluno>('', { nonNullable: true });
+  readonly turmaSearch = new FormControl<string | Turma>('', { nonNullable: true });
+
+  alunosFiltrados$!: Observable<Aluno[]>;
+  turmasFiltradas$!: Observable<Turma[]>;
+
   saving = false;
   confirming = false;
   ultimaMatricula: Matricula | null = null;
 
   ngOnInit(): void {
-    this.alunoService.listar().subscribe({
-      next: (alunos) => {
-        this.alunos = alunos.filter((a) => a.ativo);
-      }
-    });
-    this.turmaService.listar('ABERTA').subscribe({
-      next: (turmas) => {
-        this.turmasAbertas = turmas;
-      }
-    });
+    this.alunosFiltrados$ = autocompleteSearch(
+      this.alunoSearch.valueChanges,
+      this.alunoSearch.value,
+      (term) => (typeof term === 'string' ? term.trim() : ''),
+      (q) =>
+        this.alunoService.listar({ page: 0, size: 10, q }).pipe(
+          map((page) => (page.content ?? []).filter((a) => a.ativo))
+        ),
+      () => this.form.controls.alunoId.setValue('')
+    );
+
+    this.turmasFiltradas$ = autocompleteSearch(
+      this.turmaSearch.valueChanges,
+      this.turmaSearch.value,
+      (term) => (typeof term === 'string' ? term.trim() : ''),
+      (q) =>
+        this.turmaService
+          .listar({ page: 0, size: 10, status: 'ABERTA', q })
+          .pipe(map((page) => page.content ?? [])),
+      () => this.form.controls.turmaId.setValue('')
+    );
+  }
+
+  displayAluno = (value: string | Aluno): string => {
+    if (!value) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    return `${value.matriculaAcademica} — ${value.nome}`;
+  };
+
+  displayTurma = (value: string | Turma): string => {
+    if (!value) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    return `${value.codigo} — ${value.disciplinaNome}`;
+  };
+
+  selecionarAluno(aluno: Aluno): void {
+    this.form.controls.alunoId.setValue(aluno.id);
+  }
+
+  selecionarTurma(turma: Turma): void {
+    this.form.controls.turmaId.setValue(turma.id);
   }
 
   criar(): void {

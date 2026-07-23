@@ -57,9 +57,9 @@ export class DisciplinaFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
-    this.cursoService.listar().subscribe({
-      next: (cursos) => {
-        this.cursos = cursos;
+    this.cursoService.listar({ page: 0, size: 100 }).subscribe({
+      next: (page) => {
+        this.cursos = page.content;
       }
     });
 

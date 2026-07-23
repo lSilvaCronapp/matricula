@@ -3,6 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../constants/api.constants';
 import { Matricula, MatriculaCreateRequest } from '../models/matricula';
+import { PageRequest, PageResponse } from '../models/page';
+import { toHttpParams } from '../utils/http-params.util';
 
 @Injectable({ providedIn: 'root' })
 export class MatriculaService {
@@ -25,11 +27,15 @@ export class MatriculaService {
     return this.http.patch<Matricula>(`${this.baseUrl}/${id}/cancelar`, null);
   }
 
-  listarPorAluno(alunoId: string): Observable<Matricula[]> {
-    return this.http.get<Matricula[]>(`${this.baseUrl}/aluno/${alunoId}`);
+  listarPorAluno(alunoId: string, request: PageRequest = {}): Observable<PageResponse<Matricula>> {
+    return this.http.get<PageResponse<Matricula>>(`${this.baseUrl}/aluno/${alunoId}`, {
+      params: toHttpParams({ page: 0, size: 10, ...request })
+    });
   }
 
-  listarPorTurma(turmaId: string): Observable<Matricula[]> {
-    return this.http.get<Matricula[]>(`${this.baseUrl}/turma/${turmaId}`);
+  listarPorTurma(turmaId: string, request: PageRequest = {}): Observable<PageResponse<Matricula>> {
+    return this.http.get<PageResponse<Matricula>>(`${this.baseUrl}/turma/${turmaId}`, {
+      params: toHttpParams({ page: 0, size: 10, ...request })
+    });
   }
 }

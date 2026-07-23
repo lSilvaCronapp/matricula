@@ -30,6 +30,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS \"http://127.0.0.1:8080/api/v1/cursos?page=0&size=1\" >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-matricula}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-matricula}
@@ -49,11 +55,13 @@ services:
     container_name: gestao-matricula-frontend
     restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "${FRONTEND_PORT:-4200}:80"
     networks:
       - matricula-net
+
 
 volumes:
   pgdata:

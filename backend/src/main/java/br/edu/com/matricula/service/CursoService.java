@@ -3,15 +3,18 @@ package br.edu.com.matricula.service;
 import br.edu.com.matricula.domain.model.Curso;
 import br.edu.com.matricula.dto.request.CursoRequest;
 import br.edu.com.matricula.dto.response.CursoResponse;
+import br.edu.com.matricula.dto.response.PageResponse;
 import br.edu.com.matricula.exception.BusinessRuleException;
 import br.edu.com.matricula.exception.ResourceNotFoundException;
 import br.edu.com.matricula.mapper.CursoMapper;
 import br.edu.com.matricula.repository.CursoRepository;
 import br.edu.com.matricula.repository.DisciplinaRepository;
+import br.edu.com.matricula.repository.spec.EntitySpecs;
+import br.edu.com.matricula.util.SearchUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -32,8 +35,11 @@ public class CursoService {
     }
 
     @Transactional(readOnly = true)
-    public List<CursoResponse> listar() {
-        return cursoRepository.findAll().stream().map(CursoMapper::toResponse).toList();
+    public PageResponse<CursoResponse> listar(String q, Pageable pageable) {
+        var page = cursoRepository
+                .findAll(EntitySpecs.cursoComBusca(SearchUtils.normalize(q)), pageable)
+                .map(CursoMapper::toResponse);
+        return PageResponse.from(page);
     }
 
     @Transactional(readOnly = true)

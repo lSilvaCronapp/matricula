@@ -2,8 +2,12 @@ package br.edu.com.matricula.controller;
 
 import br.edu.com.matricula.dto.request.DisciplinaRequest;
 import br.edu.com.matricula.dto.response.DisciplinaResponse;
+import br.edu.com.matricula.dto.response.PageResponse;
 import br.edu.com.matricula.service.DisciplinaService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,10 +16,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -39,8 +43,11 @@ public class DisciplinaController {
     }
 
     @GetMapping
-    public List<DisciplinaResponse> listar() {
-        return disciplinaService.listar();
+    public PageResponse<DisciplinaResponse> listar(
+            @RequestParam(required = false) String q,
+            @PageableDefault(size = 10, sort = "nome", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        return disciplinaService.listar(q, pageable);
     }
 
     @GetMapping("/{id}")

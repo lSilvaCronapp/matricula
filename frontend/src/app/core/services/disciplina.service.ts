@@ -3,14 +3,18 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../constants/api.constants';
 import { Disciplina, DisciplinaRequest } from '../models/disciplina';
+import { PageRequest, PageResponse } from '../models/page';
+import { toHttpParams } from '../utils/http-params.util';
 
 @Injectable({ providedIn: 'root' })
 export class DisciplinaService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${API_BASE_URL}/disciplinas`;
 
-  listar(): Observable<Disciplina[]> {
-    return this.http.get<Disciplina[]>(this.baseUrl);
+  listar(request: PageRequest = {}): Observable<PageResponse<Disciplina>> {
+    return this.http.get<PageResponse<Disciplina>>(this.baseUrl, {
+      params: toHttpParams({ page: 0, size: 10, ...request })
+    });
   }
 
   buscarPorId(id: string): Observable<Disciplina> {

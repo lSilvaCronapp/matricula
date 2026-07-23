@@ -1,16 +1,33 @@
 <form class="filter-row" [formGroup]="form" (ngSubmit)="consultar()">
   <mat-form-field appearance="outline" class="grow">
     <mat-label>Aluno</mat-label>
-    <mat-select formControlName="alunoId">
-      @for (aluno of alunos; track aluno.id) {
-        <mat-option [value]="aluno.id">
+    <input
+      matInput
+      [formControl]="alunoSearch"
+      [matAutocomplete]="alunoAuto"
+      placeholder="Digite para buscar"
+    />
+    <mat-autocomplete
+      #alunoAuto="matAutocomplete"
+      [displayWith]="displayAluno"
+      (optionSelected)="selecionarAluno($event.option.value)"
+    >
+      @for (aluno of alunosFiltrados$ | async; track aluno.id) {
+        <mat-option [value]="aluno">
           {{ aluno.matriculaAcademica }} — {{ aluno.nome }}
         </mat-option>
       }
-    </mat-select>
+    </mat-autocomplete>
   </mat-form-field>
   <button mat-flat-button color="primary" type="submit">Consultar</button>
 </form>
+
+@if (consulted) {
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Filtrar resultados</mat-label>
+    <input matInput [formControl]="resultSearch" placeholder="Turma ou disciplina" />
+  </mat-form-field>
+}
 
 @if (loading) {
   <p class="empty">Carregando...</p>
@@ -56,4 +73,12 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
+
+  <mat-paginator
+    [length]="totalElements"
+    [pageIndex]="pageIndex"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[5, 10, 20, 50]"
+    (page)="onPage($event)"
+  />
 }

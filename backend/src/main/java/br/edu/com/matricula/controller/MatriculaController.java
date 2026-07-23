@@ -2,8 +2,12 @@ package br.edu.com.matricula.controller;
 
 import br.edu.com.matricula.dto.request.MatriculaCreateRequest;
 import br.edu.com.matricula.dto.response.MatriculaResponse;
+import br.edu.com.matricula.dto.response.PageResponse;
 import br.edu.com.matricula.service.MatriculaService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -11,10 +15,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -53,12 +57,20 @@ public class MatriculaController {
     }
 
     @GetMapping("/aluno/{alunoId}")
-    public List<MatriculaResponse> buscarPorAluno(@PathVariable UUID alunoId) {
-        return matriculaService.buscarPorAluno(alunoId);
+    public PageResponse<MatriculaResponse> buscarPorAluno(
+            @PathVariable UUID alunoId,
+            @RequestParam(required = false) String q,
+            @PageableDefault(size = 10, sort = "dataSolicitacao", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return matriculaService.buscarPorAluno(alunoId, q, pageable);
     }
 
     @GetMapping("/turma/{turmaId}")
-    public List<MatriculaResponse> buscarPorTurma(@PathVariable UUID turmaId) {
-        return matriculaService.buscarPorTurma(turmaId);
+    public PageResponse<MatriculaResponse> buscarPorTurma(
+            @PathVariable UUID turmaId,
+            @RequestParam(required = false) String q,
+            @PageableDefault(size = 10, sort = "dataSolicitacao", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return matriculaService.buscarPorTurma(turmaId, q, pageable);
     }
 }
