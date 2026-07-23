@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${TEST_DB_HOST:localhost}:${TEST_DB_PORT:5432}/matricula_test
+    username: ${TEST_DB_USER:matricula}
+    password: ${TEST_DB_PASSWORD:matricula}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+        default-page-size: 10
+
+server:
+  port: 0
